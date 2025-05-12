@@ -13,6 +13,13 @@ main <- function(data_model_url) {
                 "docs/attributes/"),
               make_subdir)
 
+  # write parent markdown files
+  header <- templates_md()
+  writeLines(header, con = "docs/metadata_templates/metadata_templates.md", sep = "\n")
+
+  header <- attributes_md()
+  writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
+
   # download latest version of data model
   model <- read.csv(data_model_url)
 
@@ -84,11 +91,11 @@ makeAttributeContent <- function(model) {
   purrr::pwalk(dplyr::select(model_attributes, Attribute, Description, rank, note),
                function(Attribute, Description, rank, note){
                  yaml_header <- get_yaml_header(title = Attribute,
-                                                parent = "Metadata Attributes",
+                                                parent = "Attributes",
                                                 nav_order = rank)
                  content <- c(paste(c("{% assign mydata=site.data.csv.attributes.",
                                       Attribute, " %}"), collapse = ""),
-                              paste(c("{% include content/", Attribute, ".html %}"), collapse = ""))
+                              paste(c("{% include content/", Attribute, ".md %}"), collapse = ""))
                  # write md file
                  fid <- glue::glue("docs/attributes/{Attribute}.md")
                  if (note) { # note TRUE -> no valid values
@@ -142,7 +149,7 @@ makeTemplateContent <- function(model) {
                                                 parent = "Metadata Templates")
                  content <- c(paste(c("{% assign mydata=site.data.csv.metadata_templates.",
                               title_snake, " %}"), collapse = ""),
-                              paste(c("{% include content/", title_snake, ".html %}"), collapse = ""))
+                              paste(c("{% include content/", title_snake, ".md %}"), collapse = ""))
                  #content <- paste(content, collapse = "\n")
 
                  fid <- glue::glue("docs/metadata_templates/{title_snake}.md")

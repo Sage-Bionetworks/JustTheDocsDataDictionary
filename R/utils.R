@@ -38,12 +38,15 @@ get_validVals <- function(df){
 #' @return a subset of `model` that contains all rows that define metadata attributes with `rank` column for ordering attribute md pages on sidebar.
 selectMetadataAttributes <- function(model) {
   # prep
-  valid_vals <- get_validVals(model)
   model_templates <- selectMetadataTemplates(model)
 
-  # select rows in model for attributes that have valid values
+  ### select rows in model for attributes
+  # first remove all rows that define templates
   model_attributes <- dplyr::filter(model,
-                                    Attribute %notin% c(model_templates$Attribute, valid_vals))
+                                    Attribute %notin% model_templates$Attribute)
+  # then remove rows that define a valid value based on presence of conditional dependency
+  model_attributes <- dplyr::filter(model_attributes, DependsOn == "")
+
   # order alphabetically and add nav_order rank
   model_attributes$rank <- stringr::str_to_lower(model_attributes$Attribute)
   model_attributes <- dplyr::arrange(model_attributes, rank)
