@@ -14,9 +14,42 @@ make_subdir <- function(d) {
 #' Return all rows in model that define metadata templates
 #' @description A util function that selects all rows in the data model that define metadata templates.
 #' @param model a data.frame object containing the data model.
+#' @return a subset of `model` that contains all rows that define metadata templates.
 selectMetadataTemplates <- function(model) {
   dplyr::filter(model, grepl("template", Attribute, ignore.case = TRUE) |
     grepl("^Component", DependsOn))
+}
+
+#' Return character vector of all valid value strings defined in the data model
+#' @description A util function that parses all valid values from a data model
+#' @param model a data.frame object containing the data model
+#' @return a character vector of all valid values defined in the data model
+get_validVals <- function(df){
+  temp <- dplyr::filter(df, !grepl("^$", Valid.Values) & !is.na(Valid.Values))
+  valid_vals <- purrr::map(temp$Valid.Values, function(d){
+    unlist(strsplit(d, ", "))
+  })
+  valid_vals <- unique(unlist(valid_vals))
+}
+
+#' Return all rows in model that define a model attribute that isn't a template
+#' @description A util function that selects all rows in the data model that define metadata attributes
+#' @param model a data.frame object containing the data model
+#' @return a subset of `model` that contains all rows that define metadata attributes with `rank` column for ordering attribute md pages on sidebar.
+selectMetadataAttributes <- function(model) {
+  # prep
+  valid_vals <- get_validVals(model)
+  model_templates <- selectMetadataTemplates(model)
+
+  # select rows in model for attributes that have valid values
+  model_attributes <- dplyr::filter(model,
+                                    Attribute %notin% c(model_templates$Attribute, valid_vals))
+  # order alphabetically and add nav_order rank
+  model_attributes$rank <- stringr::str_to_lower(model_attributes$Attribute)
+  model_attributes <- dplyr::arrange(model_attributes, rank)
+  model_attributes$rank <- 1:nrow(model_attributes)
+
+  return(model_attributes)
 }
 
 #' convert a Attribute string to desired snake case syntax

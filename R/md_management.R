@@ -2,7 +2,7 @@
 #' @param title data model attribute string
 #' @param parent class of markdown file that is being created, options c('Metadata Templates', 'Attributes')
 #' @return character vector of yaml header content
-get_yaml_header <- function(title, parent) {
+get_yaml_header <- function(title, parent, nav_order = NULL) {
   title_snake <- get_title_snake(title)
   docs_dir <- stringr::str_replace_all(parent, " ", "_")
   docs_dir <- stringr::str_to_lower(docs_dir)
@@ -15,7 +15,14 @@ get_yaml_header <- function(title, parent) {
              glue::glue("permalink: docs/{docs_dir}/{title_snake}.html"),
              glue::glue("date: {lubridate::as_date(Sys.time(), tz = 'UTC')}"),
              "---")
-  header <- paste(header, collapse = "\n")
+  if (!is.null(nav_order)) {
+    header <- paste(c(header[1:5],
+                      glue::glue("nav_order: {nav_order}"),
+                      header[6:length(header)]),
+                    collapse = "\n")
+  } else {
+    header <- paste(header, collapse = "\n")
+  }
   return(header)
 }
 
