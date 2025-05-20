@@ -1,6 +1,6 @@
-Package: DataModelPages
+Package: JustTheDocDataDictionary
 Type: Package
-Title: What the Package Does (Title Case)
+Title: An R Package To Generate JustTheDocs-themed Schematic Data Model Dictionary Site on GitHub Pages
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -18,5 +18,7 @@ Imports:
   dyplyr
   glue
   stringr
+  purrr
 Depends: 
     R (>= 3.5)
+RoxygenNote: 7.3.2
