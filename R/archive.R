@@ -6,13 +6,13 @@ archive_content <- function(model){
   ## get catalog of existing md files
   md_catalog <- get_md_cat()
   # ignore parent md files
-  md_catalog <- filter(md_catalog, Attribute %notin% c("attributes", "metadata_templates"))
+  md_catalog <- dplyr::filter(md_catalog, Attribute %notin% c("attributes", "metadata_templates"))
 
   # prep for finding files to archive
   model_templates <- selectMetadataTemplates(model)
   template_str <- unlist(purrr::map(model_templates$Attribute, get_title_snake))
   # select those attributes/templates no longer in model
-  md_catalog <- filter(md_catalog, Attribute %notin% c(model$Attribute, template_str))
+  md_catalog <- dplyr::filter(md_catalog, Attribute %notin% c(model$Attribute, template_str))
 
   # archive files that remain in md_catalog
   if (nrow(md_catalog) > 0) {
@@ -23,6 +23,8 @@ archive_content <- function(model){
                   ".archived/docs/attributes/"),
                 make_subdir)
     purrr::walk(md_catalog$full_name, archive_md)
+  } else {
+    message("No files to archive")
   }
 }
 
@@ -38,10 +40,12 @@ get_md_cat <- function(){
     out <- data.frame(full_name = list.files(dir, full.names = TRUE))
     return(out)
   })
-  md_catalog <- bind_rows(md_catalog)
+  md_catalog <- dplyr::bind_rows(md_catalog)
   md_catalog$Attribute <- unlist(purrr::map(md_catalog$full_name,
                                             function(fid) {
-                                              basename(fid) %>% str_remove(pattern = "\\.md")
+                                              fid <- basename(fid)
+                                              fid <- stringr::str_remove(fid, pattern = "\\.md")
+                                              return(fid)
                                             }))
   return(md_catalog)
 }
@@ -52,5 +56,6 @@ get_md_cat <- function(){
 #' @return NULL
 #' @noRd
 archive_md <- function(fid) {
+  message(glue::glue("Archiving {fid}"))
   file.rename(from = fid, to = glue::glue(".archived/{fid}"))
 }
