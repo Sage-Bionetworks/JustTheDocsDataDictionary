@@ -1,9 +1,29 @@
 #' archive content for attributes no longer in the model
-
-archive_content <- function(){
+#' @description Main function for archiving content for attributes no longer included in the data model
+#' @param model a data.frame object containing the data model.
+archive_content <- function(model){
+  ## get catalog of existing md files
   md_catalog <- get_md_cat()
-}
+  # ignore parent md files
+  md_catalog <- filter(md_catalog, Attribute %notin% c("attributes", "metadata_templates"))
 
+  # prep for finding files to archive
+  model_templates <- selectMetadataTemplates(model)
+  template_str <- unlist(purrr::map(model_templates$Attribute, get_title_snake))
+  # select those attributes/templates no longer in model
+  md_catalog <- filter(md_catalog, Attribute %notin% c(model$Attribute, template_str))
+
+  # archive files that remain in md_catalog
+  if (nrow(md_catalog) > 0) {
+    purrr::walk(c(".archived/", ".archived/_includes/",
+                  ".archived/_includes/content/",
+                  ".archived/docs/",
+                  ".archived/docs/metadata_templates/",
+                  ".archived/docs/attributes/"),
+                make_subdir)
+    purrr::walk(md_catalog$full_name, archive_md)
+  }
+}
 
 #' Get catalog of markdown files
 #' @description This utils function returns a data frame with the full path and name of all markdown files in the specified directories.
@@ -24,4 +44,12 @@ get_md_cat <- function(){
                                               basename(fid) %>% str_remove(pattern = "\\.md")
                                             }))
   return(md_catalog)
+}
+
+#' Move md file to archive location
+#' @description This utils function moves a markdown file to the corresponding archive location.
+#' @param fid a string representing the full path and name of the markdown file to be archived.
+#' @noRd
+archive_md <- function(fid) {
+  file.rename(from = fid, to = glue::glue(".archived/{fid}"))
 }

@@ -27,6 +27,7 @@ main <- function(data_model_url) {
   model <- dplyr::filter(model, !grepl("mock|test ", Attribute, ignore.case = TRUE))
 
   ## archive content for attributes no longer in the model
+  archive_content(model)
 
   # create/update metadata collection template content
   makeTemplateContent(model)
