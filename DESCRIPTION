@@ -4,21 +4,26 @@ Title: An R Package To Generate JustTheDocs-themed Schematic Data Model Dictiona
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jessica", "Vera",
+      "Jessica", "Vera", email = "jessica.vera@sagebase.org",
       role = c("aut", "cre"),
       comment = c(ORCID = "0000-0001-7411-8501")
     )
   )
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
-License: What license is it under?
+URL: https://github.com/Sage-Bionetworks/JustTheDocDataDictionary
+BugReports: https://github.com/Sage-Bionetworks/JustTheDocDataDictionary/issues
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-  dplyr
-  glue
-  stringr
-  purrr
+    dplyr,
+    glue,
+    stringr,
+    purrr,
+    utils,
+    snakecase,
+    rlang
 Depends: 
     R (>= 3.5)
 RoxygenNote: 7.3.2
