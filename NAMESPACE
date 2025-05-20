@@ -3,3 +3,6 @@
 export(main)
 export(makeAttributeContent)
 export(makeTemplateContent)
+importFrom(rlang,.data)
+importFrom(utils,read.csv)
+importFrom(utils,write.csv)
