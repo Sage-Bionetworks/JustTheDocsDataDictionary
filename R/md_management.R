@@ -31,6 +31,7 @@ get_docs_dir <- function(x) {
 #' write md yaml header
 #' @param title data model attribute string
 #' @param parent class of markdown file that is being created, options c('Metadata Templates', 'Attributes')
+#' @param nav_order default NULL, else specify an integer to add to the yaml header to control display order on site
 #' @return A multi-line string detailing the markdown yaml header content
 get_yaml_header <- function(title, parent = NULL, nav_order = NULL) {
   title_snake <- get_title_snake(title)

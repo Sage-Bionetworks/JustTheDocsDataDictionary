@@ -15,17 +15,19 @@ make_subdir <- function(d) {
 #' @description A util function that selects all rows in the data model that define metadata templates.
 #' @param model a data.frame object containing the data model.
 #' @return a subset of `model` that contains all rows that define metadata templates.
+#' @importFrom rlang .data
 selectMetadataTemplates <- function(model) {
-  dplyr::filter(model, grepl("template", Attribute, ignore.case = TRUE) |
-    grepl("^Component", DependsOn))
+  dplyr::filter(model, grepl("template", .data$Attribute, ignore.case = TRUE) |
+    grepl("^Component", .data$DependsOn))
 }
 
 #' Return character vector of all valid value strings defined in the data model
 #' @description A util function that parses all valid values from a data model
 #' @param model a data.frame object containing the data model
 #' @return a character vector of all valid values defined in the data model
-get_validVals <- function(df){
-  temp <- dplyr::filter(df, !grepl("^$", Valid.Values) & !is.na(Valid.Values))
+#' @importFrom rlang .data
+get_validVals <- function(model){
+  temp <- dplyr::filter(model, !grepl("^$", .data$Valid.Values) & !is.na(.data$Valid.Values))
   valid_vals <- purrr::map(temp$Valid.Values, function(d){
     unlist(strsplit(d, ", "))
   })
@@ -36,6 +38,7 @@ get_validVals <- function(df){
 #' @description A util function that selects all rows in the data model that define metadata attributes
 #' @param model a data.frame object containing the data model
 #' @return a subset of `model` that contains all rows that define metadata attributes with `rank` column for ordering attribute md pages on sidebar.
+#' @importFrom rlang .data
 selectMetadataAttributes <- function(model) {
   # prep
   model_templates <- selectMetadataTemplates(model)
@@ -43,13 +46,13 @@ selectMetadataAttributes <- function(model) {
   ### select rows in model for attributes
   # first remove all rows that define templates
   model_attributes <- dplyr::filter(model,
-                                    Attribute %notin% model_templates$Attribute)
+                                    .data$Attribute %notin% model_templates$Attribute)
   # then remove rows that define a valid value based on presence of conditional dependency
-  model_attributes <- dplyr::filter(model_attributes, DependsOn == "")
+  model_attributes <- dplyr::filter(model_attributes, .data$DependsOn == "")
 
   # order alphabetically and add nav_order rank
   model_attributes$rank <- stringr::str_to_lower(model_attributes$Attribute)
-  model_attributes <- dplyr::arrange(model_attributes, rank)
+  model_attributes <- dplyr::arrange(model_attributes, .data$rank)
   model_attributes$rank <- 1:nrow(model_attributes)
 
   return(model_attributes)

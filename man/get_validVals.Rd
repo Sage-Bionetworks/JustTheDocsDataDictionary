@@ -4,7 +4,7 @@
 \alias{get_validVals}
 \title{Return character vector of all valid value strings defined in the data model}
 \usage{
-get_validVals(df)
+get_validVals(model)
 }
 \arguments{
 \item{model}{a data.frame object containing the data model}

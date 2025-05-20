@@ -10,6 +10,8 @@ get_yaml_header(title, parent = NULL, nav_order = NULL)
 \item{title}{data model attribute string}
 
 \item{parent}{class of markdown file that is being created, options c('Metadata Templates', 'Attributes')}
+
+\item{nav_order}{default NULL, else specify an integer to add to the yaml header to control display order on site}
 }
 \value{
 A multi-line string detailing the markdown yaml header content

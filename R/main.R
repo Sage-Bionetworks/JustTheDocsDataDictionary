@@ -2,6 +2,7 @@
 #' @description A function that executes the whole workflow of creating/updating gh-pages content from a data model.
 #' @param data_model_url a string indicating the https://raw.githubusercontent.com URL of the data model csv to be used.
 #' @return NULL
+#' @importFrom rlang .data
 #' @export
 
 main <- function(data_model_url) {
@@ -24,7 +25,7 @@ main <- function(data_model_url) {
   model <- read.csv(data_model_url)
 
   # remove mock templates
-  model <- dplyr::filter(model, !grepl("mock|test ", Attribute, ignore.case = TRUE))
+  model <- dplyr::filter(model, !grepl("mock|test ", .data$Attribute, ignore.case = TRUE))
 
   ## archive content for attributes no longer in the model
   archive_content(model)
