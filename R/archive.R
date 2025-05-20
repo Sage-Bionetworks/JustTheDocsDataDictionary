@@ -1,6 +1,7 @@
 #' archive content for attributes no longer in the model
 #' @description Main function for archiving content for attributes no longer included in the data model
 #' @param model a data.frame object containing the data model.
+#' @return NULL
 archive_content <- function(model){
   ## get catalog of existing md files
   md_catalog <- get_md_cat()
@@ -27,7 +28,6 @@ archive_content <- function(model){
 
 #' Get catalog of markdown files
 #' @description This utils function returns a data frame with the full path and name of all markdown files in the specified directories.
-#' @param NULL
 #' @return data.frame with columns: full_name, Attribute
 #' @noRd
 get_md_cat <- function(){
@@ -49,6 +49,7 @@ get_md_cat <- function(){
 #' Move md file to archive location
 #' @description This utils function moves a markdown file to the corresponding archive location.
 #' @param fid a string representing the full path and name of the markdown file to be archived.
+#' @return NULL
 #' @noRd
 archive_md <- function(fid) {
   file.rename(from = fid, to = glue::glue(".archived/{fid}"))
