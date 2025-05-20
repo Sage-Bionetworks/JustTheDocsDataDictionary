@@ -1,4 +1,4 @@
-Package: JustTheDocDataDictionary
+Package: JustTheDocsDataDictionary
 Type: Package
 Title: An R Package To Generate JustTheDocs-themed Schematic Data Model Dictionary Site on GitHub Pages
 Version: 0.1.0
@@ -11,8 +11,8 @@ Authors@R: c(
   )
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
-URL: https://github.com/Sage-Bionetworks/JustTheDocDataDictionary
-BugReports: https://github.com/Sage-Bionetworks/JustTheDocDataDictionary/issues
+URL: https://github.com/Sage-Bionetworks/JustTheDocsDataDictionary
+BugReports: https://github.com/Sage-Bionetworks/JustTheDocsDataDictionary/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
