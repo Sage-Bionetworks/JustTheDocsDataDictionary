@@ -45,8 +45,8 @@ jobs:
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          token: ${{ secrets.ARK_CICD_SERVICE_ACCOUNT }}
+          ref: main
+          token: ${{ github.token }}
 
       - name: Update site content
         run: |
