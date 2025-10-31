@@ -2,6 +2,25 @@
 #' @noRd
 `%notin%` <- Negate(`%in%`)
 
+#' make necessary subdirs and parent md files needed to create site content
+#' @noRd
+configure_space <- function() {
+  # config subdirs
+  purrr::walk(c("_includes/content/",
+                "_data/csv/attributes/",
+                "_data/csv/metadata_templates/",
+                "docs/metadata_templates/",
+                "docs/attributes/"),
+              make_subdir)
+  
+  # write parent markdown files
+  header <- templates_md()
+  writeLines(header, con = "docs/metadata_templates/metadata_templates.md", sep = "\n")
+  
+  header <- attributes_md()
+  writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
+}
+
 #' make a directory if it does not exist
 #' @param d a string indicating the name of the directory to make
 #' @noRd
@@ -40,15 +59,8 @@ get_validVals <- function(model){
 #' @return a subset of `model` that contains all rows that define metadata attributes with `rank` column for ordering attribute md pages on sidebar.
 #' @importFrom rlang .data
 selectMetadataAttributes <- function(model) {
-  # prep
-  model_templates <- selectMetadataTemplates(model)
-
-  ### select rows in model for attributes
-  # first remove all rows that define templates
-  model_attributes <- dplyr::filter(model,
-                                    .data$Attribute %notin% model_templates$Attribute)
-  # then remove rows that define a valid value based on presence of conditional dependency
-  model_attributes <- dplyr::filter(model_attributes, .data$DependsOn == "")
+  # DependsOn defined templates and conditionally required relationships
+  model_attributes <- dplyr::filter(model, .data$DependsOn == "")
 
   # order alphabetically and add nav_order rank
   model_attributes$rank <- stringr::str_to_lower(model_attributes$Attribute)
