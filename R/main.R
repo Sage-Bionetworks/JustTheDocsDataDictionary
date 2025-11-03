@@ -1,28 +1,21 @@
 #' Main
 #' @description A function that executes the whole workflow of creating/updating gh-pages content from a data model.
-#' @param data_model_url a string indicating the https://raw.githubusercontent.com URL of the data model csv to be used.
+#' @param portal a string indicating the data model portal abbreviation, e.g., <portal>.model.csv: 'ark', 'veoibd'
+#' @param template_dir a string specifying the subdir where template files are stored, default = "model_templates"
+#' @param branch a OPTIONAL string indicating subdir to which the model main branch has been downloaded to, default = "./"
 #' @return NULL
 #' @importFrom rlang .data
 #' @export
 
-main <- function(data_model_url) {
+main <- function(portal,
+                 template_dir = "model_templates",
+                 branch = "./") {
   # config subdirs
-  purrr::walk(c("_includes/content/",
-                "_data/csv/attributes/",
-                "_data/csv/metadata_templates/",
-                "docs/metadata_templates/",
-                "docs/attributes/"),
-              make_subdir)
-
-  # write parent markdown files
-  header <- templates_md()
-  writeLines(header, con = "docs/metadata_templates/metadata_templates.md", sep = "\n")
-
-  header <- attributes_md()
-  writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
+  configure_space()
 
   # download latest version of data model
-  model <- read.csv(data_model_url)
+  fid <- glue::glue("{branch}/{portal}.model.csv")
+  model <- read.csv(fid)
 
   # remove mock templates
   model <- dplyr::filter(model, !grepl("mock|test ", .data$Attribute, ignore.case = TRUE))
@@ -31,7 +24,7 @@ main <- function(data_model_url) {
   archive_content(model)
 
   # create/update metadata collection template content
-  makeTemplateContent(model)
+  makeTemplateContent(model, template_dir_path = file.path(branch, template_dir))
 
   # create/update metadata attribute content
   makeAttributeContent(model)
@@ -113,8 +106,9 @@ makeAttributeContent <- function(model) {
 #' Make metadata collection template content
 #' @description A function that executes a series of steps to create/update metadata collection template pages.
 #' @param model a data.frame object containing the data model.
+#' @param template_dir_path a string specifying the subdir where template files are stored
 #' @export
-makeTemplateContent <- function(model) {
+makeTemplateContent <- function(model, template_dir_path) {
   # select all rows that define templates for metadata collection
   model_templates <- selectMetadataTemplates(model)
 
@@ -131,18 +125,30 @@ makeTemplateContent <- function(model) {
   # add column to df for title_snakecase
   model_templates$title_snake <- unlist(purrr::map(model_templates$Attribute,
                                                    get_title_snake))
+  # add column for UpperCamelCase to enable template file finding
+  model_templates$camel <-
+    unlist(purrr::map(model_templates$Attribute, get_camel_case))
 
   # create csv detailing each metadata template
-  purrr::walk2(model_templates$title_snake, model_templates$DependsOn,
-               function(title_snake, depends, df) {
-                 depends <- unlist(strsplit(depends, ", "))
-                 out <- dplyr::filter(df, Attribute %in% depends)
-                 out$Attribute <- factor(out$Attribute, levels = depends)
-                 out <- dplyr::select(out, Attribute, Description, Required, Valid.Values)
-                 out <- dplyr::arrange(out, Attribute)
-                 fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
-                 write_model_csv(out, fid)
-               }, df = model)
+  purrr::walk2(model_templates$title_snake, model_templates$camel,
+              function(title_snake, camel, df, template_dir) {
+                template_fid <- list.files(template_dir,
+                                           pattern = glue::glue("^{camel}"),
+                                           full.names = TRUE)
+                # open either xlsx or csv template file, which ever is 1st in vector
+                if (grepl("\\.xlsx$", template_fid[1])) {
+                  template_df <- openxlsx::read.xlsx(template_fid[1], sheet = 1)
+                } else if (grepl("\\.csv$", template_fid[1])) {
+                  template_df <- read.csv(template_fid[1])
+                } else {
+                  stop(glue::glue("No template file found for {camel}"))
+                }
+                out <- data.frame(Attribute = colnames(template_df))
+                out <- dplyr::left_join(out, df, by = "Attribute")
+                fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
+                write_model_csv(out, fid)
+              }, df = dplyr::select(model, Attribute, Description, Required, Valid.Values),
+              template_dir = template_dir_path)
 
   ### write md page for each template to docs/metadata_templates/
   purrr::pwalk(dplyr::select(model_templates, Attribute, Description, title_snake),

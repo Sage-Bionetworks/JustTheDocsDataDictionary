@@ -4,10 +4,14 @@
 \alias{main}
 \title{Main}
 \usage{
-main(data_model_url)
+main(portal, template_dir = "model_templates", branch = "./")
 }
 \arguments{
-\item{data_model_url}{a string indicating the https://raw.githubusercontent.com URL of the data model csv to be used.}
+\item{portal}{a string indicating the data model portal abbreviation, e.g., <portal>.model.csv: 'ark', 'veoibd'}
+
+\item{template_dir}{a string specifying the subdir where template files are stored, default = "model_templates"}
+
+\item{branch}{a OPTIONAL string indicating subdir to which the model main branch has been downloaded to, default = "./"}
 }
 \description{
 A function that executes the whole workflow of creating/updating gh-pages content from a data model.

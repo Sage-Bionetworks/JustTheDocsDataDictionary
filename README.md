@@ -41,12 +41,25 @@ jobs:
             any::rlang
             any::remotes
             any::lubridate
+            any::openxlsx
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: main
           token: ${{ github.token }}
+
+      - name: Checkout model files write to subdir
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }} # Checkout the same repository
+          ref: main # Specify the branch you want to access
+          path: main # Checkout into a different directory
+          token: ${{ github.token }}
+
+      - name: Clean up before commit
+        run: |
+          rm -Rf main/
 
       - name: Update site content
         run: |
@@ -63,11 +76,11 @@ remotes::install_github("Sage-Bionetworks/JustTheDocsDataDictionary")
 # load installed library
 library(JustTheDocsDataDictionary)
 
-args <- commandArgs(trailingOnly = TRUE)
-
 # generate site content
-main(args[1])
+main(portal = <portal>, branch = "main")
 
 # END
 ```
+
+For more details on running `main`, see documentation.
 

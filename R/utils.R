@@ -2,6 +2,25 @@
 #' @noRd
 `%notin%` <- Negate(`%in%`)
 
+#' make necessary subdirs and parent md files needed to create site content
+#' @noRd
+configure_space <- function() {
+  # config subdirs
+  purrr::walk(c("_includes/content/",
+                "_data/csv/attributes/",
+                "_data/csv/metadata_templates/",
+                "docs/metadata_templates/",
+                "docs/attributes/"),
+              make_subdir)
+
+  # write parent markdown files
+  header <- templates_md()
+  writeLines(header, con = "docs/metadata_templates/metadata_templates.md", sep = "\n")
+
+  header <- attributes_md()
+  writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
+}
+
 #' make a directory if it does not exist
 #' @param d a string indicating the name of the directory to make
 #' @noRd
@@ -40,15 +59,9 @@ get_validVals <- function(model){
 #' @return a subset of `model` that contains all rows that define metadata attributes with `rank` column for ordering attribute md pages on sidebar.
 #' @importFrom rlang .data
 selectMetadataAttributes <- function(model) {
-  # prep
-  model_templates <- selectMetadataTemplates(model)
-
-  ### select rows in model for attributes
-  # first remove all rows that define templates
-  model_attributes <- dplyr::filter(model,
-                                    .data$Attribute %notin% model_templates$Attribute)
-  # then remove rows that define a valid value based on presence of conditional dependency
-  model_attributes <- dplyr::filter(model_attributes, .data$DependsOn == "")
+  # DependsOn column is used to define templates and conditionally required relationships
+  # thus remove those rows to get only attributes
+  model_attributes <- dplyr::filter(model, .data$DependsOn == "")
 
   # order alphabetically and add nav_order rank
   model_attributes$rank <- stringr::str_to_lower(model_attributes$Attribute)
@@ -65,6 +78,21 @@ get_title_snake <- function(x) {
   title_snake <- snakecase::to_snake_case(x)
   title_snake <- stringr::str_replace(title_snake, "sc_rna_seq", "scrnaseq")
   return(title_snake)
+}
+
+#' convert a Attribute string to desired CamelCase syntax with biological abbreviations intact
+#' @param x a string indicating the attribute string
+#' @return a string with the attribute name in CamelCase with biological abbreviations intact
+get_camel_case <- function(x) {
+  # split string on spaces
+  x <- unlist(strsplit(x, " "))
+  # capitalize first letter of first 'word' in string
+  x[1] <- paste(toupper(substr(x[1], 1, 1)),
+                substr(x[1], 2, nchar(x[1])),
+                sep = "")
+  # collapse all 'words' together into single string
+  out <- paste(x, collapse = "")
+  return(out)
 }
 
 #' write csv in desired format
