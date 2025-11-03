@@ -41,6 +41,7 @@ jobs:
             any::rlang
             any::remotes
             any::lubridate
+            any::openxlsx
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
