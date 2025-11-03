@@ -13,19 +13,7 @@ main <- function(portal,
                  template_list,
                  branch = "./") {
   # config subdirs
-  purrr::walk(c("_includes/content/",
-                "_data/csv/attributes/",
-                "_data/csv/metadata_templates/",
-                "docs/metadata_templates/",
-                "docs/attributes/"),
-              make_subdir)
-
-  # write parent markdown files
-  header <- templates_md()
-  writeLines(header, con = "docs/metadata_templates/metadata_templates.md", sep = "\n")
-
-  header <- attributes_md()
-  writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
+  configure_space()
 
   # download latest version of data model
   fid <- glue::glue("{branch}/{portal}.model.csv")
