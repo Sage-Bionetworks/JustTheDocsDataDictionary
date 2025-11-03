@@ -114,12 +114,12 @@ makeAttributeContent <- function(model) {
 #' @description A function that executes a series of steps to create/update metadata collection template pages.
 #' @param model a data.frame object containing the data model.
 #' @export
-makeTemplateContent <- function(model) {
+makeTemplateContent <- function(model, template_dir_path) {
   # select all rows that define templates for metadata collection
   model_templates <- selectMetadataTemplates(model)
 
   # make or update _includes/content/md file for each template
-  purrr::walk2(model_templates$Attribute,
+  purrr::walk2(model_templates$Attribute, # template name as written in model.csv file
                model_templates$Description,
                function(attribute, description) {
                  content_md(attr = get_title_snake(attribute),
@@ -133,16 +133,24 @@ makeTemplateContent <- function(model) {
                                                    get_title_snake))
 
   # create csv detailing each metadata template
-  purrr::walk2(model_templates$title_snake, model_templates$DependsOn,
+  purrr::walk(model_templates$title_snake,
                function(title_snake, depends, df) {
-                 depends <- unlist(strsplit(depends, ", "))
-                 out <- dplyr::filter(df, Attribute %in% depends)
-                 out$Attribute <- factor(out$Attribute, levels = depends)
-                 out <- dplyr::select(out, Attribute, Description, Required, Valid.Values)
-                 out <- dplyr::arrange(out, Attribute)
+                 template_fid <- list.files(template_dir_path,
+                                            pattern = glue::glue("^{title_snake}"),
+                                            full.names = TRUE)
+                 # open either xlsx or csv template file, which ever is 1st in vector
+                 if (grepl("\\.xlsx$", template_fid[1])) {
+                   template_df <- readxl::read_excel(template_fid[1], sheet = 1)
+                 } else if (grepl("\\.csv$", template_fid[1])) {
+                   template_df <- read.csv(template_fid[1])
+                 } else {
+                   stop(glue::glue("No template file found for {title_snake}"))
+                 }
+                 out <- data.frame(Attribute = colnames(template_df))
+                 out <- dplyr::left_join(out, model, by = "Attribute")
                  fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
                  write_model_csv(out, fid)
-               }, df = model)
+               }, df = dplyr::select(model, Attribute, Description, Required, Valid.Values), template_dir = template_dir_path)
 
   ### write md page for each template to docs/metadata_templates/
   purrr::pwalk(dplyr::select(model_templates, Attribute, Description, title_snake),
