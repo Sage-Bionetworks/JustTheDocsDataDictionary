@@ -80,6 +80,21 @@ get_title_snake <- function(x) {
   return(title_snake)
 }
 
+#' convert a Attribute string to desired CamelCase syntax with biological abbreviations intact
+#' @param x a string indicating the attribute string
+#' @return a string with the attribute name in CamelCase with biological abbreviations intact
+get_camel_case <- function(x) {
+  # split string on spaces
+  x <- unlist(strsplit(x, " "))
+  # capitalize first letter of first 'word' in string
+  x[1] <- paste(toupper(substr(x[1], 1, 1)),
+                substr(x[1], 2, nchar(x[1])),
+                sep = "")
+  # collapse all 'words' together into single string
+  out <- paste(x, collapse = "")
+  return(out)
+}
+
 #' write csv in desired format
 #' @param df a data.frame object to be written to csv
 #' @param fid a string indicating the filename to write to
