@@ -1,6 +1,6 @@
 #' Main
 #' @description A function that executes the whole workflow of creating/updating gh-pages content from a data model.
-#' @param portal a string indicating the data model portal abbreviation, e.g., <portal>.data_model.csv: 'ark', 'veoibd'
+#' @param portal a string indicating the data model portal abbreviation, e.g., <portal>.model.csv: 'ark', 'veoibd'
 #' @param template_dir a string specifying the subdir where template files are stored, default = "model_templates"
 #' @param template_list a header-less txt file listing out all of the templates defined by the model
 #' @param branch a OPTIONAL string indicating subdir to which the model main branch has been downloaded to, default = "./"
@@ -28,7 +28,7 @@ main <- function(portal,
   writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
 
   # download latest version of data model
-  fid <- glue::glue("{branch}/{portal}.data_model.csv")
+  fid <- glue::glue("{branch}/{portal}.model.csv")
   model <- read.csv(fid)
 
   # remove mock templates
