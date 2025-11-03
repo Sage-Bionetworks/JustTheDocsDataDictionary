@@ -139,7 +139,7 @@ makeTemplateContent <- function(model, template_dir_path) {
                                            full.names = TRUE)
                 # open either xlsx or csv template file, which ever is 1st in vector
                 if (grepl("\\.xlsx$", template_fid[1])) {
-                  template_df <- openxlsx::read_excel(template_fid[1], sheet = 1)
+                  template_df <- openxlsx::read.xlsx(template_fid[1], sheet = 1)
                 } else if (grepl("\\.csv$", template_fid[1])) {
                   template_df <- read.csv(template_fid[1])
                 } else {
