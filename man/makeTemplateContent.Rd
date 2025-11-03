@@ -4,10 +4,12 @@
 \alias{makeTemplateContent}
 \title{Make metadata collection template content}
 \usage{
-makeTemplateContent(model)
+makeTemplateContent(model, template_dir_path)
 }
 \arguments{
 \item{model}{a data.frame object containing the data model.}
+
+\item{template_dir_path}{a string specifying the subdir where template files are stored}
 }
 \description{
 A function that executes a series of steps to create/update metadata collection template pages.
