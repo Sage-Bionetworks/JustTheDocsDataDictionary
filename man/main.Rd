@@ -4,14 +4,12 @@
 \alias{main}
 \title{Main}
 \usage{
-main(portal, template_dir = "model_templates", template_list, branch = "./")
+main(portal, template_dir = "model_templates", branch = "./")
 }
 \arguments{
 \item{portal}{a string indicating the data model portal abbreviation, e.g., <portal>.model.csv: 'ark', 'veoibd'}
 
 \item{template_dir}{a string specifying the subdir where template files are stored, default = "model_templates"}
-
-\item{template_list}{a header-less txt file listing out all of the templates defined by the model}
 
 \item{branch}{a OPTIONAL string indicating subdir to which the model main branch has been downloaded to, default = "./"}
 }
