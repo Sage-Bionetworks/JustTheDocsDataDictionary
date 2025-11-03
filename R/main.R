@@ -1,11 +1,17 @@
 #' Main
 #' @description A function that executes the whole workflow of creating/updating gh-pages content from a data model.
-#' @param data_model_url a string indicating the https://raw.githubusercontent.com URL of the data model csv to be used.
+#' @param portal a string indicating the data model portal abbreviation, e.g., <portal>.data_model.csv: 'ark', 'veoibd'
+#' @param template_dir a string specifying the subdir where template files are stored, default = "model_templates"
+#' @param template_list a header-less txt file listing out all of the templates defined by the model
+#' @param branch a OPTIONAL string indicating subdir to which the model main branch has been downloaded to, default = "./"
 #' @return NULL
 #' @importFrom rlang .data
 #' @export
 
-main <- function(data_model_url) {
+main <- function(portal,
+                 template_dir = "model_templates",
+                 template_list,
+                 branch = "./") {
   # config subdirs
   purrr::walk(c("_includes/content/",
                 "_data/csv/attributes/",
@@ -22,7 +28,8 @@ main <- function(data_model_url) {
   writeLines(header, con = "docs/attributes/attributes.md", sep = "\n")
 
   # download latest version of data model
-  model <- read.csv(data_model_url)
+  fid <- glue::glue("{branch}/{portal}.data_model.csv")
+  model <- read.csv(fid)
 
   # remove mock templates
   model <- dplyr::filter(model, !grepl("mock|test ", .data$Attribute, ignore.case = TRUE))
