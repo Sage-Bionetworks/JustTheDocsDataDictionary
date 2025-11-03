@@ -146,7 +146,7 @@ makeTemplateContent <- function(model, template_dir_path) {
                   stop(glue::glue("No template file found for {camel}"))
                 }
                 out <- data.frame(Attribute = colnames(template_df))
-                out <- dplyr::left_join(out, model, by = "Attribute")
+                out <- dplyr::left_join(out, df, by = "Attribute")
                 fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
                 write_model_csv(out, fid)
               }, df = dplyr::select(model, Attribute, Description, Required, Valid.Values),
