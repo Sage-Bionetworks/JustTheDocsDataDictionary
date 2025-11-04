@@ -17,14 +17,13 @@ main <- function(portal,
   fid <- glue::glue("{branch}/{portal}.model.csv")
   model <- read.csv(fid)
 
-  # remove mock templates
-  model <- dplyr::filter(model, !grepl("mock|test ", .data$Attribute, ignore.case = TRUE))
-
   ## archive content for attributes no longer in the model
   archive_content(model)
 
   # create/update metadata collection template content
-  makeTemplateContent(model, template_dir_path = file.path(branch, template_dir))
+  makeTemplateContent(model,
+                      template_dir_path = file.path(branch, template_dir),
+                      portal)
 
   # create/update metadata attribute content
   makeAttributeContent(model)
@@ -108,7 +107,7 @@ makeAttributeContent <- function(model) {
 #' @param model a data.frame object containing the data model.
 #' @param template_dir_path a string specifying the subdir where template files are stored
 #' @export
-makeTemplateContent <- function(model, template_dir_path) {
+makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
   # select all rows that define templates for metadata collection
   model_templates <- selectMetadataTemplates(model)
 
@@ -131,24 +130,28 @@ makeTemplateContent <- function(model, template_dir_path) {
 
   # create csv detailing each metadata template
   purrr::walk2(model_templates$title_snake, model_templates$camel,
-              function(title_snake, camel, df, template_dir) {
+              function(title_snake, camel, df, template_dir, portal) {
+                # get CSV template made from json schema in ci-schema-convert workflow
                 template_fid <- list.files(template_dir,
-                                           pattern = glue::glue("^{camel}"),
+                                           pattern = glue::glue("^{portal}\\.{camel}"),
                                            full.names = TRUE)
-                # open either xlsx or csv template file, which ever is 1st in vector
-                if (grepl("\\.xlsx$", template_fid[1])) {
-                  template_df <- openxlsx::read.xlsx(template_fid[1], sheet = 1)
-                } else if (grepl("\\.csv$", template_fid[1])) {
+                template_fid <- template_fid[grepl("\\.csv$", template_fid)]
+
+                # open csv template file, if found
+                if (length(template_fid) == 1) {
                   template_df <- read.csv(template_fid[1])
-                } else {
+                } else if (length(template_fid) == 0) {
                   stop(glue::glue("No template file found for {camel}"))
+                } else {
+                    stop(glue::glue("Multiple CSV template files found for {camel}"))
                 }
+                # generatal csv file for this template site page
                 out <- data.frame(Attribute = colnames(template_df))
                 out <- dplyr::left_join(out, df, by = "Attribute")
                 fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
                 write_model_csv(out, fid)
               }, df = dplyr::select(model, Attribute, Description, Required, Valid.Values),
-              template_dir = template_dir_path)
+              template_dir = template_dir_path, portal)
 
   ### write md page for each template to docs/metadata_templates/
   purrr::pwalk(dplyr::select(model_templates, Attribute, Description, title_snake),
