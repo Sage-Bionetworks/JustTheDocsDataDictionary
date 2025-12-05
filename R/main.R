@@ -110,6 +110,9 @@ makeAttributeContent <- function(model) {
 makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
   # select all rows that define templates for metadata collection
   model_templates <- selectMetadataTemplates(model)
+  # ignore BDM-specific templates
+  model_templates <- dplyr::filter(model_templates,
+                                   !grepl("^BDM", .data$Attribute, ignore.case = FALSE))
 
   # make or update _includes/content/md file for each template
   purrr::walk2(model_templates$Attribute,
