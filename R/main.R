@@ -145,7 +145,7 @@ makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
                 } else {
                     stop(glue::glue("Multiple CSV template files found for {camel}"))
                 }
-                # generatal csv file for this template site page
+                # generate csv file for this template site page
                 out <- data.frame(Attribute = colnames(template_df))
                 out <- dplyr::left_join(out, df, by = "Attribute")
                 fid = glue::glue("_data/csv/metadata_templates/{title_snake}.csv")
