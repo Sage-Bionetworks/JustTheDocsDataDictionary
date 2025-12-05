@@ -1,7 +1,7 @@
 Package: JustTheDocsDataDictionary
 Type: Package
 Title: An R Package To Generate JustTheDocs-themed Schematic Data Model Dictionary Site on GitHub Pages
-Version: 1.2-devel
+Version: 1.2.0
 Authors@R: c(
     person(
       "Jessica", "Vera", email = "jessica.vera@sagebase.org",
