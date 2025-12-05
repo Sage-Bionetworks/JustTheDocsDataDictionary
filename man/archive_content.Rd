@@ -7,7 +7,7 @@
 archive_content(model)
 }
 \arguments{
-\item{model}{a data.frame object containing the data model.}
+\item{model}{a data.frame object containing all data model content.}
 }
 \description{
 Main function for archiving content for attributes no longer included in the data model

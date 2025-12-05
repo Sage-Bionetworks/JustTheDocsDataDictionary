@@ -1,6 +1,6 @@
 #' archive content for attributes no longer in the model
 #' @description Main function for archiving content for attributes no longer included in the data model
-#' @param model a data.frame object containing the data model.
+#' @param model a data.frame object containing all data model content.
 #' @return NULL
 #' @importFrom rlang .data
 archive_content <- function(model){
@@ -12,8 +12,10 @@ archive_content <- function(model){
   # prep for finding files to archive
   model_templates <- selectMetadataTemplates(model)
   template_str <- unlist(purrr::map(model_templates$Attribute, get_title_snake))
-  # select those attributes/templates no longer in model
-  md_catalog <- dplyr::filter(md_catalog, .data$Attribute %notin% c(model$Attribute, template_str))
+  # build character vector of all attributes/templates defined in a model
+  ref <- c(unique(model$Attribute), template_str)
+  # select md content for attr/templates no longer in model
+  md_catalog <- dplyr::filter(md_catalog, .data$Attribute %notin% ref)
 
   # archive files that remain in md_catalog
   if (nrow(md_catalog) > 0) {

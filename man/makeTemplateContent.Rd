@@ -4,7 +4,7 @@
 \alias{makeTemplateContent}
 \title{Make metadata collection template content}
 \usage{
-makeTemplateContent(model, template_dir_path)
+makeTemplateContent(model, template_dir_path, portal = NULL)
 }
 \arguments{
 \item{model}{a data.frame object containing the data model.}
