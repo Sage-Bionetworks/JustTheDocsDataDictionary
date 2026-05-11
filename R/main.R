@@ -142,7 +142,7 @@ makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
 
                 # open csv template file, if found
                 if (length(template_fid) == 1) {
-                  template_df <- read.csv(template_fid[1])
+                  template_df <- read.csv(template_fid[1], check.names = FALSE)
                 } else if (length(template_fid) == 0) {
                   stop(glue::glue("No template file found for {camel}"))
                 } else {
