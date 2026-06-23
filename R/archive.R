@@ -27,7 +27,7 @@ archive_content <- function(model){
                   ".archived/_data/csv/attributes/",
                   ".archived/_data/csv/metadata_templates/"),
                 make_subdir)
-    purrr::walk(content_catalog$full_name, archive_content)
+    purrr::walk(content_catalog$full_name, archive_file)
   } else {
     message("No files to archive")
   }
@@ -62,7 +62,7 @@ get_content_cat <- function(){
 #' @param fid a string representing the full path and name of the markdown file to be archived.
 #' @return NULL
 #' @noRd
-archive_content <- function(fid) {
+archive_file <- function(fid) {
   message(glue::glue("Archiving {fid}"))
   file.rename(from = fid, to = glue::glue(".archived/{fid}"))
 }
