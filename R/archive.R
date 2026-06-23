@@ -4,10 +4,10 @@
 #' @return NULL
 #' @importFrom rlang .data
 archive_content <- function(model){
-  ## get catalog of existing md files
-  md_catalog <- get_md_cat()
+  ## get catalog of existing md and _data/csv files
+  content_catalog <- get_content_cat()
   # ignore parent md files
-  md_catalog <- dplyr::filter(md_catalog, .data$Attribute %notin% c("attributes", "metadata_templates"))
+  content_catalog <- dplyr::filter(content_catalog, .data$Attribute %notin% c("attributes", "metadata_templates"))
 
   # prep for finding files to archive
   model_templates <- selectMetadataTemplates(model)
@@ -15,17 +15,19 @@ archive_content <- function(model){
   # build character vector of all attributes/templates defined in a model
   ref <- c(unique(model$Attribute), template_str)
   # select md content for attr/templates no longer in model
-  md_catalog <- dplyr::filter(md_catalog, .data$Attribute %notin% ref)
+  content_catalog <- dplyr::filter(content_catalog, .data$Attribute %notin% ref)
 
-  # archive files that remain in md_catalog
-  if (nrow(md_catalog) > 0) {
+  # archive files that remain in content_catalog
+  if (nrow(content_catalog) > 0) {
     purrr::walk(c(".archived/", ".archived/_includes/",
                   ".archived/_includes/content/",
                   ".archived/docs/",
                   ".archived/docs/metadata_templates/",
-                  ".archived/docs/attributes/"),
+                  ".archived/docs/attributes/",
+                  ".archived/_data/csv/attributes/",
+                  ".archived/_data/csv/metadata_templates/"),
                 make_subdir)
-    purrr::walk(md_catalog$full_name, archive_md)
+    purrr::walk(content_catalog$full_name, archive_content)
   } else {
     message("No files to archive")
   }
@@ -35,30 +37,32 @@ archive_content <- function(model){
 #' @description This utils function returns a data frame with the full path and name of all markdown files in the specified directories.
 #' @return data.frame with columns: full_name, Attribute
 #' @noRd
-get_md_cat <- function(){
-  md_dirs <- c("_includes/content/",
+get_content_cat <- function(){
+  content_dirs <- c("_includes/content/",
                "docs/metadata_templates/",
-               "docs/attributes/")
-  md_catalog <- purrr::map(md_dirs, function(dir) {
+               "docs/attributes/",
+               "_data/csv/attributes/",
+               "_data/csv/metadata_templates/")
+  content_catalog <- purrr::map(content_dirs, function(dir) {
     out <- data.frame(full_name = list.files(dir, full.names = TRUE))
     return(out)
   })
-  md_catalog <- dplyr::bind_rows(md_catalog)
-  md_catalog$Attribute <- unlist(purrr::map(md_catalog$full_name,
+  content_catalog <- dplyr::bind_rows(content_catalog)
+  content_catalog$Attribute <- unlist(purrr::map(content_catalog$full_name,
                                             function(fid) {
                                               fid <- basename(fid)
-                                              fid <- stringr::str_remove(fid, pattern = "\\.md")
+                                              fid <- stringr::str_remove_all(fid, pattern = "\\.md|\\.csv")
                                               return(fid)
                                             }))
-  return(md_catalog)
+  return(content_catalog)
 }
 
-#' Move md file to archive location
+#' Move content file to archive location
 #' @description This utils function moves a markdown file to the corresponding archive location.
 #' @param fid a string representing the full path and name of the markdown file to be archived.
 #' @return NULL
 #' @noRd
-archive_md <- function(fid) {
+archive_content <- function(fid) {
   message(glue::glue("Archiving {fid}"))
   file.rename(from = fid, to = glue::glue(".archived/{fid}"))
 }
