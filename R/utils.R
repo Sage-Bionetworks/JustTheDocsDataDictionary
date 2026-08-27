@@ -36,8 +36,7 @@ make_subdir <- function(d) {
 #' @return a subset of `model` that contains all rows that define metadata templates.
 #' @importFrom rlang .data
 selectMetadataTemplates <- function(model) {
-  dplyr::filter(model, grepl("template", .data$Attribute, ignore.case = TRUE) |
-    grepl("^Component", .data$DependsOn))
+  dplyr::filter(model, grepl("template|annotation", .data$Attribute, ignore.case = TRUE))
 }
 
 #' Return character vector of all valid value strings defined in the data model
