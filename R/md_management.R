@@ -71,29 +71,58 @@ get_yaml_header <- function(title, parent = NULL, nav_order = NULL) {
 }
 
 #'
-content_md <- function(attr, desc, vals_note = FALSE, title = NULL) {
+content_md <- function(attr, desc, vals_note = FALSE, title = NULL, instructions = NULL) {
   if (desc == ""){
     desc = "Content TBD"
   }
+  print(glue::glue("{attr}"))
 
-  fid <- glue::glue("_includes/content/{attr}.md")
-  md_lines <- glue::glue("# {attr}")
+  md_lines <- list("title" = c(glue::glue("# {attr}")))
   if (!is.null(title)) {
-    md_lines <- glue::glue("# {title}")
+    md_lines <- list("title" = c(glue::glue("# {title}")))
   }
 
+  fid <- glue::glue("_includes/content/{attr}.md")
   if (!file.exists(fid)) {
-    md_lines <- c(md_lines, desc)
+    md_lines <- c(md_lines, list("desc" = c(desc)))
     if (vals_note){
-      md_lines <- c(md_lines, "\n",
-                    "{: .note }",
-                    "There are no defined valid values for this model attribute.")
+      md_lines <- c(md_lines,
+                    list("note" = c("\n",
+                                    "{: .note }",
+                                    "There are no defined valid values for this model attribute.")))
     }
+    if (!is.null(instructions)) {
+      md_lines <- c(md_lines,
+                    list("### Instructions" = instructions))
+    }
+    out <- purrr::map2(names(md_lines), md_lines, function(n, l) {
+      if (grepl("^#", n)) {
+        return(c(n, l))
+      } else {
+        return(l)
+      }
+    })
+    out <- unlist(out)
+    writeLines(out, con = fid)
   } else {
     # replace existing description text with what's in the model just in case there have
     # been any changes
     md_lines <- readLines(fid)
     md_lines[2] <- desc
+    if (!is.null(instructions)) {
+      n <- length(md_lines)
+      # if instructions already in the md file
+      if (any(grepl("Instructions", md_lines))) {
+        md_lines[4] <- instructions
+      } else {
+        out <- c(md_lines[1:2],
+                 c("### Instructions", instructions))
+        if (n > 2) {
+          out <- c(out, md_lines[3:n])
+        }
+        md_lines <- out
+      }
+    }
+    writeLines(md_lines, con = fid)
   }
-  writeLines(md_lines, con = fid)
 }

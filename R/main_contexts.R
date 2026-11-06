@@ -9,7 +9,8 @@
 
 main_contexts <- function(portal,
                           template_dir = "model_templates",
-                          branch = "./") {
+                          branch = "./",
+                          instructions_fid = NULL) {
   # config repo space
   configure_space()
 
@@ -25,9 +26,9 @@ main_contexts <- function(portal,
   fids <- fids[grepl("model\\.csv$", fids)]
   models <- purrr::map(fids, read.csv)
   # process each context model separately so that each template page renders context-specific details
-  purrr::walk(models, function(model, template_dir_path, portal) {
-    makeTemplateContent(model, template_dir_path, portal)
-  }, template_dir_path = file.path(branch, template_dir), portal)
+  purrr::walk(models, function(model, template_dir_path, portal, instructions_fid) {
+    makeTemplateContent(model, template_dir_path, portal, instructions_fid)
+  }, template_dir_path = file.path(branch, template_dir), portal, instructions_fid)
 
   ## archive content that is not longer defined in the data model
   models <- dplyr::bind_rows(models)

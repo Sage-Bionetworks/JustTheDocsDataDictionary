@@ -9,7 +9,8 @@
 
 main <- function(portal,
                  template_dir = "model_templates",
-                 branch = "./") {
+                 branch = "./",
+                 instructions_fid = NULL) {
   # config subdirs
   configure_space()
 
@@ -23,7 +24,7 @@ main <- function(portal,
   # create/update metadata collection template content
   makeTemplateContent(model,
                       template_dir_path = file.path(branch, template_dir),
-                      portal)
+                      portal, instructions_fid)
 
   # create/update metadata attribute content
   makeAttributeContent(model)
@@ -35,6 +36,7 @@ main <- function(portal,
 #' @param model a data.frame object containing the data model.
 #' @export
 makeAttributeContent <- function(model) {
+
   # get df of metadata attributes with nav_order rank added
   model_attributes <- selectMetadataAttributes(model)
   # add column to df for content_md vals_note param
@@ -107,7 +109,12 @@ makeAttributeContent <- function(model) {
 #' @param model a data.frame object containing the data model.
 #' @param template_dir_path a string specifying the subdir where template files are stored
 #' @export
-makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
+makeTemplateContent <- function(model, template_dir_path, portal = NULL, instructions_fid = NULL) {
+  if (!is.null(instructions_fid)) {
+    template_instructions <- jsonlite::read_json(instructions_fid)
+  } else {
+    template_instructions <- NULL
+  }
   # select all rows that define templates for metadata collection
   model_templates <- selectMetadataTemplates(model)
   # ignore BDM-specific templates
@@ -117,12 +124,14 @@ makeTemplateContent <- function(model, template_dir_path, portal = NULL) {
   # make or update _includes/content/md file for each template
   purrr::walk2(model_templates$Attribute,
                model_templates$Description,
-               function(attribute, description) {
+               function(attribute, description, t_instructions) {
                  content_md(attr = get_title_snake(attribute),
                             desc = description,
                             vals_note = FALSE,
-                            title = attribute)
-               })
+                            title = attribute,
+                            instructions = ifelse(is.null(t_instructions), NULL,
+                                                  t_instructions[[get_camel_case(attribute)]]))
+               }, t_instructions = template_instructions)
 
   # add column to df for title_snakecase
   model_templates$title_snake <- unlist(purrr::map(model_templates$Attribute,
